@@ -1,0 +1,42 @@
+#datebase set
+[cveDict]
+type = "sqlite3"
+SQLite3Path = "/root/cve.sqlite3"
+
+[ovalDict]
+type = "sqlite3"
+SQLite3Path = "/root/oval.sqlite3"
+
+[gost]
+type = "sqlite3"
+SQLite3Path = "/root/gost.sqlite3"
+
+[exploit]
+type = "sqlite3"
+SQLite3Path = "/root/go-exploitdb.sqlite3"
+
+[metasploit]
+type = ["sqlite3"]
+sqlite3Path = "/root/go-msfdb.sqlite3"
+
+[kevuln]
+type = ["sqlite3"]
+sqlite3Path = "/root/go-kev.sqlite3"
+
+[cti]
+type = ["sqlite3"]
+sqlite3Path = "/root/go-cti.sqlite3"
+
+[default]
+port               = "22"
+user               = "root"
+keyPath            = "/home/root/.ssh/id_rsa"
+keyPath            = "/root/.ssh/id_rsa"
+scanMode           = ["fast"]
+ignoreCves         = ["CVE-2014-6271"]
+
+[servers.localhost]
+host = "localhost"
+
+[vuls]
+host = ""

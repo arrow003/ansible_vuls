@@ -1,0 +1,218 @@
+---
+- hosts: vuls 
+  vars:
+    hello: Ansible
+    go_version: 1.18.3
+    vuls_bin: /root/go/bin/
+    vuls_data: /root/
+
+  environment:
+#    https_proxy: 
+#    http_proxy: 
+#    no_proxy: 
+
+  tasks:
+  - name: Install sqlite git gcc make wget
+    yum:
+      name:
+       - sqlite
+       - git
+       - gcc
+       - make
+       - wget
+      state: latest
+      disable_gpg_check: yes 
+    tags: install
+ 
+  - name: prepare intall folder
+    action: shell mkdir -p /tmp/vuls_install/  /root/go
+    tags: configuration
+
+  - name: download go
+    get_url: url=https://dl.google.com/go/go{{go_version}}.linux-amd64.tar.gz dest=/tmp/vuls_install/
+
+  - name: Unarchive go
+    unarchive:
+      src: /tmp/vuls_install/go{{go_version}}.linux-amd64.tar.gz
+      dest: /usr/local
+      copy: no 
+
+  - name: copy go env
+    copy: src=goenv.sh dest=/etc/profile.d/goenv.sh
+    tags: configuration
+
+  - name: set go env
+    action: shell source /etc/profile.d/goenv.sh
+
+  - name: mkdir vuls
+    shell: mkdir /var/log/vuls && chown root /var/log/vuls && chmod 700 /var/log/vuls
+
+  - name: mkdir go-exploitdb 
+    shell: mkdir -p /var/log/go-exploitdb && chown root /var/log/go-exploitdb && chmod 700 /var/log/go-exploitdb 
+
+  - name: mkdir gost
+    shell: mkdir /var/log/gost && chown root /var/log/gost && chmod 700 /var/log/gost
+
+  - name: mkdir go-kev
+    shell: mkdir /var/log/go-kev && chown root /var/log/go-kev && chmod 700 /var/log/go-kev
+
+  - name: mkdir go-cti
+    shell: mkdir /var/log/go-cti && chown root /var/log/go-cti && chmod 700 /var/log/go-cti
+
+  - name: mkdir go-msfdb
+    shell: mkdir /var/log/go-msfdb && chown root /var/log/go-msfdb && chmod 700 /var/log/go-msfdb
+
+  - name: mkdir github source
+    shell: mkdir -p $GOPATH/src/github.com/future-architect && mkdir -p $GOPATH/src/github.com/vulsio
+
+  - name: Deploy go-exploitdb git
+    git:
+      dest=/root/go/src/github.com/vulsio/go-exploitdb
+      repo=https://github.com/vulsio/go-exploitdb.git
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy go-exploitdb make
+    make:
+      chdir: /root/go/src/github.com/vulsio/go-exploitdb
+
+  - name: Deploy  goval-dictionary git
+    git:
+      dest=/root/go/src/github.com/vulsio/goval-dictionary
+      repo=https://github.com/vulsio/goval-dictionary.git
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy goval-dictionary make
+    make:
+      chdir: /root/go/src/github.com/vulsio/goval-dictionary
+
+  - name: Deploy go-cve-dictionary 2 git
+    git:
+      repo=https://github.com/vulsio/go-cve-dictionary.git 
+      dest=/root/go/src/github.com/vulsio/go-cve-dictionary
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy go-cve-dictionary 3 make
+    make:
+      chdir: /root/go/src/github.com/vulsio/go-cve-dictionary
+
+  - name: Deploy gost 2 git
+    git:
+      repo=https://github.com/vulsio/gost.git 
+      dest=/root/go/src/github.com/vulsio/gost
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy gost 3 make
+    make:
+      chdir: /root/go/src/github.com/vulsio/gost
+
+  - name: Deploy go-msfdb 2 git
+    git:
+      repo=https://github.com/vulsio/go-msfdb.git
+      dest=/root/go/src/github.com/vulsio/go-msfdb
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy go-msfdb 3 make
+    make:
+      chdir: /root/go/src/github.com/vulsio/go-msfdb
+
+  - name: Deploy go-kev 2 git
+    git:
+      repo=https://github.com/vulsio/go-kev.git
+      dest=/root/go/src/github.com/vulsio/go-kev
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy go-kev 3 make
+    make:
+      chdir: /root/go/src/github.com/vulsio/go-kev
+
+  - name: Deploy go-cti 2 git
+    git:
+      repo=https://github.com/vulsio/go-cti.git
+      dest=/root/go/src/github.com/vulsio/go-cti
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy go-cti 3 make
+    make:
+      chdir: /root/go/src/github.com/vulsio/go-cti
+
+  - name: Deploy Vuls 2 git
+    git:
+      repo=https://github.com/future-architect/vuls.git 
+      dest=/root/go/src/github.com/future-architect/vuls
+      update=yes
+      force=yes
+      accept_hostkey=yes
+
+  - name: Deploy vuls 3 make
+    make:
+      chdir: /root/go/src/github.com/future-architect/vuls
+
+  - name: mv vuls bin file
+    shell: mv /root/go/src/github.com/future-architect/vuls/vuls {{vuls_bin}}
+
+  - name: mv go-exploitdb bin file
+    shell: mv /root/go/src/github.com/vulsio/go-exploitdb/go-exploitdb {{vuls_bin}}
+
+  - name: mv goval-dictionary bin file
+    shell: mv /root/go/src/github.com/vulsio/goval-dictionary/goval-dictionary {{vuls_bin}}
+
+  - name: mv go-cve-dictionary bin file
+    shell: mv /root/go/src/github.com/vulsio/go-cve-dictionary/go-cve-dictionary {{vuls_bin}}
+
+  - name: mv gost bin file
+    shell: mv /root/go/src/github.com/vulsio/gost/gost {{vuls_bin}}
+
+  - name: mv go-msfdb bin file
+    shell:  mv /root/go/src/github.com/vulsio/go-msfdb/go-msfdb {{vuls_bin}}
+
+  - name: mv go-kev bin file
+    shell:  mv /root/go/src/github.com/vulsio/go-kev/go-kev {{vuls_bin}}
+
+  - name: mv go-cti bin file
+    shell:  mv /root/go/src/github.com/vulsio/go-cti/go-cti {{vuls_bin}}
+
+  - name: go-cve-dictionary fetch nvd
+    shell: go-cve-dictionary fetch nvd 2022 --dbpath={{vuls_data}}cve.sqlite3
+    tags: fetch
+
+  - name: go-cve-dictionary fetch jvn
+    shell: go-cve-dictionary fetch  jvn 2022 --dbpath={{vuls_data}}cve.sqlite3
+    tags: fetch
+
+  - name: goval-dictionary fetch redhat 6 7 8 9
+    shell: goval-dictionary fetch redhat 6 7 8 --dbpath={{vuls_data}}oval.sqlite3
+    tags: fetch
+
+  - name: go-exploitdb fetch exploitdb
+    shell: go-exploitdb fetch exploitdb --dbpath={{vuls_data}}go-exploitdb.sqlite3
+    tags: fetch
+
+  - name: gost fetch redhat
+    shell: gost fetch redhat --dbpath={{vuls_data}}gost.sqlite3
+    tags: fetch
+
+  - name: go-msfdb fetch msfdb
+    shell: go-msfdb fetch msfdb   --dbpath={{vuls_data}}msfdb.sqlite3
+    tags: fetch
+
+  - name: go-kev fetch kevuln
+    shell: go-kev fetch kevuln   --dbpath={{vuls_data}}go-kev.sqlite3
+    tags: fetch
+
+  - name: go-cti fetch threat
+    shell: go-cti fetch threat  --dbpath={{vuls_data}}go-cti.sqlite3
+    tags: fetch
