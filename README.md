@@ -2,15 +2,15 @@
 1.在ansible服务器侧添加准备安装vuls服务器的hosts
 
 $ cat /etc/ansible/hosts 
-
+```
 [vuls]
-
 172.26.37.140 ansible_ssh_user=root ansible_ssh_pass='123456'
-
-
+```
 2.下载ansible安装的playbook等文件
 
 $ git clone git@github.com:arrow003/ansible_vuls.git
+
+$ cd ansible_vuls
 
 3.执行playbook（执行之前可以通过[vars]修改准备部署的目录
 
